@@ -46,7 +46,7 @@ The wrapped deposit contract is short and simple (less than 50 lines of code) an
 
 The wrapped deposit contract offers a simple way for application programmers to handle deposits of Ether and tokens without needing to interface with the token contract.
 
-## Application Contract Usage
+## Application contract usage
 
 To accept deposits an application contract should implement the `DepositReceiver` interface. This consists of a single function `acceptDeposit(depositor, token, amount)`. This function should revert if the deposit is not accepted. If the function does not revert the funds will either be transferred, or the transaction will revert. An example implementation is shown below:
 
