@@ -52,10 +52,14 @@ To accept deposits an application contract should implement the `DepositReceiver
 
 ```js
 contract MyApplication implements DepositReceiver {
-  address constant ALLOWED_DEPOSIT_TOKEN = address(0);
+  address constant ALLOWED_DEPOSIT_TOKEN;
+  address constant WRAPPER;
   mapping (address => uint) balanceOf;
 
   function acceptDeposit(address depositor, address token, uint amount) public {
+    // Make sure it's the wrapper contract calling this function
+    require(msg.sender == WRAPPER, "Unauthorized");
+    // This application allows only 1 token to be deposited
     require(token == ALLOWED_DEPOSIT_TOKEN, "Invalid deposit asset")
     balanceOf[depositor] += amount;
   }
