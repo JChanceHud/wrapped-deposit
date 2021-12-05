@@ -1,7 +1,7 @@
 /// SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
-interface Merchant {
+interface DepositReceiver {
   function acceptDeposit(address depositor, address token, uint amount) external;
 }
 
@@ -12,7 +12,7 @@ interface IERC20 {
 contract WrappedDeposit {
   function depositToken(address to, address token, uint amount) public {
     require(_isContract(to));
-    Merchant(to).acceptDeposit(msg.sender, token, amount);
+    DepositReceiver(to).acceptDeposit(msg.sender, token, amount);
     bytes memory data = abi.encodeWithSelector(
       IERC20(token).transferFrom.selector,
       msg.sender,
@@ -29,7 +29,7 @@ contract WrappedDeposit {
 
   function depositEther(address to) public payable {
     require(_isContract(to));
-    Merchant(to).acceptDeposit(msg.sender, address(0), msg.value);
+    DepositReceiver(to).acceptDeposit(msg.sender, address(0), msg.value);
     (bool success, ) = to.call{value: msg.value}('');
     require(success);
   }
