@@ -21,7 +21,7 @@ async function exec(fnCall) {
   await tx.wait()
 }
 
-describe('WrapedDeposit', function () {
+describe('WrappedDeposit', function () {
   it('should refuse deposit to non-contract', async () => {
     const { wrapped, testToken } = await getDeployedContracts()
     const [ sender ] = await ethers.getSigners()
