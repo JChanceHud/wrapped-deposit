@@ -24,8 +24,8 @@ interface IERC721 {
 
 contract WrappedDeposit {
   function depositERC20(address to, address token, uint amount) public {
-    require(_isContract(to), "noncontract");
-    tryExecute(to, abi.encodeWithSelector(
+    _assertContract(to);
+    _tryExecute(to, abi.encodeWithSelector(
       ERC20Receiver(to).acceptERC20Deposit.selector,
       msg.sender,
       token,
@@ -39,15 +39,15 @@ contract WrappedDeposit {
     );
     (bool success, bytes memory returndata) = token.call(data);
     require(success);
+    // backward compat for tokens incorrectly implementing the transfer function
     if (returndata.length > 0) {
-      // Return data is optional
       require(abi.decode(returndata, (bool)), "ERC20 operation did not succeed");
     }
   }
 
   function depositERC721(address to, address token, uint tokenId) public {
-    require(_isContract(to), "noncontract");
-    tryExecute(to, abi.encodeWithSelector(
+    _assertContract(to);
+    _tryExecute(to, abi.encodeWithSelector(
       ERC721Receiver(to).acceptERC721Deposit.selector,
       msg.sender,
       token,
@@ -57,8 +57,8 @@ contract WrappedDeposit {
   }
 
   function safeDepositERC721(address to, address token, uint tokenId, bytes memory data) public {
-    require(_isContract(to), "noncontract");
-    tryExecute(to, abi.encodeWithSelector(
+    _assertContract(to);
+    _tryExecute(to, abi.encodeWithSelector(
       ERC721Receiver(to).acceptERC721Deposit.selector,
       msg.sender,
       token,
@@ -68,8 +68,8 @@ contract WrappedDeposit {
   }
 
   function depositEther(address to) public payable {
-    require(_isContract(to), "noncontract");
-    tryExecute(to, abi.encodeWithSelector(
+    _assertContract(to);
+    _tryExecute(to, abi.encodeWithSelector(
       EtherReceiver(to).acceptEtherDeposit.selector,
       msg.sender,
       msg.value
@@ -82,18 +82,18 @@ contract WrappedDeposit {
    * Try to call a function that should return a boolean. If anything other
    * than true is returned revert.
    **/
-  function tryExecute(address to, bytes memory data) private {
+  function _tryExecute(address to, bytes memory data) private {
     (bool success, bytes memory returndata) = to.call(data);
     require(success, "fail");
     require(returndata.length > 0, "noreturndata");
     require(abi.decode(returndata, (bool)), "badreturn");
   }
 
-  function _isContract(address c) private view returns (bool) {
+  function _assertContract(address c) private view {
     uint size;
     assembly {
       size := extcodesize(c)
     }
-    return size > 0;
+    require(size > 0, "noncontract");
   }
 }
