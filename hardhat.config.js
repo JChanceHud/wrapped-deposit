@@ -1,3 +1,5 @@
+require('@nomiclabs/hardhat-waffle')
+
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
@@ -15,7 +17,7 @@ module.exports = {
   networks: {
     goerli: {
       url: 'http://192.168.1.198:9545',
-      accounts: ['0x6afb38998c73c93abfe21e137609dad96e4c0e7164a5af4e87641d7188f05f42']
+      accounts: ['0x18ef552014cb0717769838c7536bc1d3b1c800fe351aa2c38ac093fa4d4eb7d6'],
     }
   },
   mocha: {
