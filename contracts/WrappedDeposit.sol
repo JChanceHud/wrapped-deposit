@@ -75,7 +75,7 @@ contract WrappedDeposit {
       msg.value
     ));
     (bool success, ) = to.call{value: msg.value}('');
-    require(success);
+    require(success, "nonpayable");
   }
 
   /**
@@ -84,9 +84,9 @@ contract WrappedDeposit {
    **/
   function tryExecute(address to, bytes memory data) private {
     (bool success, bytes memory returndata) = to.call(data);
-    require(success);
-    require(returndata.length > 0);
-    require(abi.decode(returndata, (bool)));
+    require(success, "fail");
+    require(returndata.length > 0, "noreturndata");
+    require(abi.decode(returndata, (bool)), "badreturn");
   }
 
   function _isContract(address c) private view returns (bool) {

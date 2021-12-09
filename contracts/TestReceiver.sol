@@ -3,8 +3,8 @@ pragma solidity ^0.7.0;
 import "./WrappedDeposit.sol";
 
 contract TestReceiver is ERC20Receiver, EtherReceiver {
-  mapping (address => uint) testTokenBalances;
-  mapping (address => uint) etherBalances;
+  mapping (address => uint) public testTokenBalances;
+  mapping (address => uint) public etherBalances;
   address immutable WRAPPED_DEPOSIT;
   address immutable TEST_TOKEN;
 
@@ -12,6 +12,8 @@ contract TestReceiver is ERC20Receiver, EtherReceiver {
     WRAPPED_DEPOSIT = wrappedDeposit;
     TEST_TOKEN = testToken;
   }
+
+  fallback() external payable {}
 
   function acceptERC20Deposit(address depositor, address token, uint amount) public override returns (bool) {
     require(msg.sender == WRAPPED_DEPOSIT);
