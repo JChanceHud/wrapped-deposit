@@ -4,16 +4,16 @@ A method of depositing ERC20 tokens with fewer transactions and less risk.
 
 ## How it works
 
-A user approves the wrapped deposit token to spend tokens on their behalf. Applications needing to accept deposits implement the following function:
+A user approves the wrapped deposit token to spend tokens on their behalf. Applications needing to accept deposits implement a function like the following:
 
 ```js
-function acceptDeposit(address depositor, address token, uint amount) returns (bool);
+function acceptERC20Deposit(address depositor, address token, uint amount) external returns (bool);
 ```
 
 Applications then have the user send a transaction to the deposit wrapper like this:
 ```js
-// to is the application address
-depositToken(address to, address token, uint amount);
+// `to` is the application address
+depositERC20(address to, address token, uint amount);
 ```
 
 ## Difference from existing models
@@ -56,12 +56,15 @@ contract MyApplication implements DepositReceiver {
   address constant WRAPPER;
   mapping (address => uint) balanceOf;
 
-  function acceptDeposit(address depositor, address token, uint amount) public {
+  function acceptERC20Deposit(address depositor, address token, uint amount) public returns (bool) {
     // Make sure it's the wrapper contract calling this function
     require(msg.sender == WRAPPER, "Unauthorized");
     // This application allows only 1 token to be deposited
-    require(token == ALLOWED_DEPOSIT_TOKEN, "Invalid deposit asset")
-    balanceOf[depositor] += amount;
+    if (token == ALLOWED_DEPOSIT_TOKEN) {
+      balanceOf[depositor] += amount;
+      return true;
+    }
+    return false;
   }
 }
 ```
