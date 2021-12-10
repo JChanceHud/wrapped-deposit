@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "compile": "hardhat compile",
+    "coverage": "hardhat coverage && lcov-badge-generator ./coverage/lcov.info -o ./coverage/badge.svg",
     "test": "hardhat test"
   },
   "author": "Chance Hudson",
@@ -14,6 +15,8 @@
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.5.2",
-    "hardhat": "^2.7.0"
+    "hardhat": "^2.7.0",
+    "lcov-badge-generator": "^1.0.5",
+    "solidity-coverage": "^0.7.17"
   }
 }
