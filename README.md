@@ -1,6 +1,6 @@
 # Wrapped Deposit
 
-[![](https://img.shields.io/circleci/build/github/JChanceHud/wrapped-deposit)](https://app.circleci.com/pipelines/github/JChanceHud/wrapped-deposit) [![](https://tubby.cloud/tubs/61b2cba857ad4e001899a6f0/badge.svg)](https://tubby.cloud/tubs/61b2cba857ad4e001899a6f0/index.html)
+[![build-badge](https://img.shields.io/circleci/build/github/JChanceHud/wrapped-deposit)](https://app.circleci.com/pipelines/github/JChanceHud/wrapped-deposit) [![coverage-badge](https://tubby.cloud/tubs/61b2cba857ad4e001899a6f0/badge.svg)](https://tubby.cloud/tubs/61b2cba857ad4e001899a6f0/index.html)
 
 A method of depositing ERC20 tokens with fewer transactions and less risk.
 
