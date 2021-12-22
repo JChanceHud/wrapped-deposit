@@ -1,7 +1,6 @@
 /// SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
-
 contract TestTokenNonStandard {
   uint constant _totalSupply = type(uint256).max;
   mapping (address => uint) balances;

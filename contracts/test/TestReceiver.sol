@@ -1,6 +1,6 @@
 pragma solidity ^0.7.0;
 
-import "./WrappedDeposit.sol";
+import "../WrappedDeposit.sol";
 
 contract TestReceiver is ERC20Receiver, EtherReceiver {
   mapping (address => uint) public testTokenBalances;

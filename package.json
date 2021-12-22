@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "compile": "hardhat compile",
-    "coverage": "hardhat coverage && lcov-badge-generator ./coverage/lcov.info -o ./coverage/badge.svg",
+    "coverage": "npm run clean && hardhat coverage && lcov-badge-generator ./coverage/lcov.info -o ./coverage/badge.svg",
+    "clean": "hardhat clean",
     "test": "hardhat test"
   },
   "author": "Chance Hudson",
