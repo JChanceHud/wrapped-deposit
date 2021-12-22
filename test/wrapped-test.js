@@ -17,7 +17,12 @@ async function getDeployedContracts() {
   const TestNonReceiver = await ethers.getContractFactory('TestNonReceiver')
   const nonReceiver = await TestNonReceiver.deploy()
   await nonReceiver.deployed()
-  return { wrapped, testToken, testReceiver, nonReceiver }
+
+  const TestEtherNonPayable = await ethers.getContractFactory('TestEtherNonPayable')
+  const etherNonPayable = await TestEtherNonPayable.deploy()
+  await etherNonPayable.deployed()
+
+  return { wrapped, testToken, testReceiver, nonReceiver, etherNonPayable }
 }
 
 async function exec(fnCall) {
@@ -102,6 +107,19 @@ describe('WrappedDeposit', function () {
       await tx.wait()
     } catch (err) {
       assert(err.toString().indexOf('function returned an unexpected amount of data') !== -1)
+    }
+  })
+
+  it('should fail to deposit ether if non-payable', async () => {
+    const { wrapped, etherNonPayable } = await getDeployedContracts()
+    const [ sender ] = await ethers.getSigners()
+    try {
+      const tx = await wrapped.connect(sender).depositEther(etherNonPayable.address, {
+        value: 1000,
+      })
+      await tx.wait()
+    } catch (err) {
+      assert(err.toString().indexOf('nonpayable') !== -1)
     }
   })
 
