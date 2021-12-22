@@ -1,7 +1,8 @@
-// SPDX-License-Identifier: MIT
+/// SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
-contract TestToken {
+
+contract TestTokenNonStandard {
   uint constant _totalSupply = type(uint256).max;
   mapping (address => uint) balances;
   mapping (address => mapping (address => uint)) approvals;
@@ -34,22 +35,20 @@ contract TestToken {
     return balances[owner];
   }
 
-  function transfer(address to, uint value) public returns (bool) {
+  function transfer(address to, uint value) public {
     require(balances[msg.sender] >= value, 'Insufficient balance');
     balances[msg.sender] -= value;
     balances[to] += value;
     emit Transfer(msg.sender, to, value);
-    return true;
   }
 
-  function transferFrom(address from, address to, uint value) public virtual returns (bool) {
+  function transferFrom(address from, address to, uint value) public virtual {
     require(approvals[from][msg.sender] >= value, 'Insuffient approval');
     require(balances[from] >= value, 'Insufficient balance');
     balances[from] -= value;
     balances[to] += value;
     approvals[from][msg.sender] -= value;
     emit Transfer(from, to, value);
-    return true;
   }
 
   function approve(address spender, uint value) public returns (bool) {

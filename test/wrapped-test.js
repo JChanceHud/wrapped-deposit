@@ -10,8 +10,12 @@ async function getDeployedContracts() {
   const testToken = await TestToken.deploy()
   await testToken.deployed()
 
+  const TestTokenNonStandard = await ethers.getContractFactory('TestTokenNonStandard')
+  const testTokenNonStandard = await TestTokenNonStandard.deploy()
+  await testTokenNonStandard.deployed()
+
   const TestReceiver = await ethers.getContractFactory('TestReceiver')
-  const testReceiver = await TestReceiver.deploy(wrapped.address, testToken.address)
+  const testReceiver = await TestReceiver.deploy(wrapped.address, testToken.address, testTokenNonStandard.address)
   await testReceiver.deployed()
 
   const TestNonReceiver = await ethers.getContractFactory('TestNonReceiver')
@@ -22,7 +26,7 @@ async function getDeployedContracts() {
   const etherNonPayable = await TestEtherNonPayable.deploy()
   await etherNonPayable.deployed()
 
-  return { wrapped, testToken, testReceiver, nonReceiver, etherNonPayable }
+  return { wrapped, testToken, testReceiver, nonReceiver, etherNonPayable, testTokenNonStandard }
 }
 
 async function exec(fnCall) {
@@ -123,6 +127,34 @@ describe('WrappedDeposit', function () {
     }
   })
 
+  it('should fail to deposit erc20', async () => {
+    const { wrapped, testReceiver, testToken } = await getDeployedContracts()
+    const [ sender ] = await ethers.getSigners()
+
+    // mint some tokens
+    await exec(testToken.connect(sender).mint(1000))
+    try {
+      // run the deposit
+      await exec(wrapped.connect(sender).depositERC20(testReceiver.address, testToken.address, 10))
+    } catch (err) {
+      assert(err.toString().indexOf('transferfail') !== -1)
+    }
+  })
+
+  it('should fail to deposit non-standard erc20', async () => {
+    const { wrapped, testReceiver, testTokenNonStandard } = await getDeployedContracts()
+    const [ sender ] = await ethers.getSigners()
+
+    // mint some tokens
+    await exec(testTokenNonStandard.connect(sender).mint(1000))
+    try {
+      // run the deposit
+      await exec(wrapped.connect(sender).depositERC20(testReceiver.address, testTokenNonStandard.address, 10))
+    } catch (err) {
+      assert(err.toString().indexOf('transferfail') !== -1)
+    }
+  })
+
   it('should deposit ether', async () => {
     const { wrapped, testReceiver } = await getDeployedContracts()
     const [ sender ] = await ethers.getSigners()
@@ -138,16 +170,40 @@ describe('WrappedDeposit', function () {
   it('should deposit erc20', async () => {
     const { wrapped, testReceiver, testToken } = await getDeployedContracts()
     const [ sender ] = await ethers.getSigners()
-    const startBalance = await testReceiver.testTokenBalances(sender.address)
+    const DEPOSIT_AMOUNT = 10
+    const startBalanceCalc = await testReceiver.testTokenBalances(sender.address)
+    const startBalance = await testToken.balanceOf(testReceiver.address)
 
     // mint some tokens
     await exec(testToken.connect(sender).mint(1000))
     // set an approval
     await exec(testToken.connect(sender).approve(wrapped.address, 9999999999999))
     // run the deposit
-    await exec(wrapped.connect(sender).depositERC20(testReceiver.address, testToken.address, 10))
+    await exec(wrapped.connect(sender).depositERC20(testReceiver.address, testToken.address, DEPOSIT_AMOUNT))
 
-    const endBalance = await testReceiver.testTokenBalances(sender.address)
-    assert.equal(+endBalance.toString() - +startBalance.toString(), 10)
+    const endBalanceCalc = await testReceiver.testTokenBalances(sender.address)
+    const endBalance = await testToken.balanceOf(testReceiver.address)
+    assert.equal(+endBalanceCalc.toString() - +startBalanceCalc.toString(), DEPOSIT_AMOUNT)
+    assert.equal(+endBalance.toString() - +startBalance.toString(), DEPOSIT_AMOUNT)
+  })
+
+  it('should deposit erc20 with non-standard sig', async () => {
+    const { wrapped, testReceiver, testTokenNonStandard } = await getDeployedContracts()
+    const [ sender ] = await ethers.getSigners()
+    const DEPOSIT_AMOUNT = 10
+    const startBalanceCalc = await testReceiver.testTokenBalances(sender.address)
+    const startBalance = await testTokenNonStandard.balanceOf(testReceiver.address)
+
+    // mint some tokens
+    await exec(testTokenNonStandard.connect(sender).mint(1000))
+    // set an approval
+    await exec(testTokenNonStandard.connect(sender).approve(wrapped.address, 9999999999999))
+    // run the deposit
+    await exec(wrapped.connect(sender).depositERC20(testReceiver.address, testTokenNonStandard.address, DEPOSIT_AMOUNT))
+
+    const endBalanceCalc = await testReceiver.testTokenBalances(sender.address)
+    const endBalance = await testTokenNonStandard.balanceOf(testReceiver.address)
+    assert.equal(+endBalance.toString() - +startBalance.toString(), DEPOSIT_AMOUNT)
+    assert.equal(+endBalance.toString() - +startBalance.toString(), DEPOSIT_AMOUNT)
   })
 })

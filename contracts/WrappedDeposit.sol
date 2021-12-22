@@ -43,7 +43,7 @@ contract WrappedDeposit {
       amount
     );
     (bool success, bytes memory returndata) = token.call(data);
-    require(success);
+    require(success, "transferfail");
     // backward compat for tokens incorrectly implementing the transfer function
     if (returndata.length > 0) {
       require(abi.decode(returndata, (bool)), "ERC20 operation did not succeed");
