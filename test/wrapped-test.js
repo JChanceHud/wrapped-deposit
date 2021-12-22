@@ -13,7 +13,11 @@ async function getDeployedContracts() {
   const TestReceiver = await ethers.getContractFactory('TestReceiver')
   const testReceiver = await TestReceiver.deploy(wrapped.address, testToken.address)
   await testReceiver.deployed()
-  return { wrapped, testToken, testReceiver }
+
+  const TestNonReceiver = await ethers.getContractFactory('TestNonReceiver')
+  const nonReceiver = await TestNonReceiver.deploy()
+  await nonReceiver.deployed()
+  return { wrapped, testToken, testReceiver, nonReceiver }
 }
 
 async function exec(fnCall) {
@@ -50,6 +54,54 @@ describe('WrappedDeposit', function () {
       assert(
         err.toString().indexOf('reverted with reason string \'noncontract\'') !== -1
       )
+    }
+  })
+
+  it('should revert if no accept deposit function', async () => {
+    const { wrapped, testToken, nonReceiver } = await getDeployedContracts()
+    const [ sender ] = await ethers.getSigners()
+
+    try {
+      const tx = await wrapped.connect(sender).depositEther(
+        testToken.address,
+        {
+          value: 1000,
+        }
+      )
+      await tx.wait()
+    } catch (err) {
+      assert(err.toString().indexOf('function selector was not recognized') !== -1)
+    }
+    try {
+      const tx = await wrapped.connect(sender).depositERC20(
+        testToken.address,
+        testToken.address,
+        10
+      )
+      await tx.wait()
+    } catch (err) {
+      assert(err.toString().indexOf('function selector was not recognized') !== -1)
+    }
+    try {
+      const tx = await wrapped.connect(sender).depositEther(
+        nonReceiver.address,
+        {
+          value: 1000,
+        }
+      )
+      await tx.wait()
+    } catch (err) {
+      assert(err.toString().indexOf('function returned an unexpected amount of data') !== -1)
+    }
+    try {
+      const tx = await wrapped.connect(sender).depositERC20(
+        nonReceiver.address,
+        testToken.address,
+        10
+      )
+      await tx.wait()
+    } catch (err) {
+      assert(err.toString().indexOf('function returned an unexpected amount of data') !== -1)
     }
   })
 
